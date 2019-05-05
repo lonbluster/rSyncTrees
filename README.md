@@ -80,8 +80,8 @@ https://lonblu.wordpress.com/2019/04/12/rsyncrestore-restore-linux-rsync-backups
 The vbackup script does already a job in saving the partition table and backing up live mysql servers. 
 It will be incorporated in rSyncBackup eventually.
 
-Many restore situations have not been tested, including managing new file permissions, and some symbolic links.
-Also the default inclusions do not include library directories that do not contain any user data (/usr, /lib, lib64 ). Anyhow if they get deleted your system may be broke, so you want to always have a Onetime sync of those, at least.
+Many restore situations have not been tested, including managing new file permissions, and some symbolic/hard links (the Full backup is actually archiving those links, that is, copying the source).
+Also the default inclusions do not include the huge software library directories (/usr, /lib, lib64) that store no user/system new data. Anyhow if they get deleted your system may be broke, so you want to always have a Onetime sync of those, at least.
 For now, one is supposed to reinstall Linux and restore the files and directories needed. 
 Share your reports and suggestions for a more automated restore tool for Linux.
 
