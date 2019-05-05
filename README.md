@@ -1,20 +1,12 @@
 # rSyncBackup.sh
 Optional Variables:
-
 STORAGE=/the/main/disk/with/space
-
 otherStorage=/disk/with/space
-
 rsbHOME=/any/dir/forLogsAndConfig
-
 HELP=off
-
 ttestMb=555 #by default transfer speed
-
 forward_mail=user@domain.ext
-
 smtp_server=mail@domain.ext(:25)
-
 minGbfree=9 #by default disk space remaining triggering warning
 
 
