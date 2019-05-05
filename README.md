@@ -22,7 +22,7 @@
 - [x] dup - for the Previous dir
 - [x] duA - list all storage subfolders
 - [x] Rs - restores files and directories 
-- [x] rp - creates gz.tar of the sync directory
+- [x] rp - creates gz.tar recovery point of the sync directory
 - [x] Rrp - restores the rp to a folder or to current sync dir
 - [x] speed - test rsync backup on configured storage
 - [x] old [pattern] - query/remove previous versions | optional grep pattern filter: rSyncBackup old mtab_[0-3][0-9]
