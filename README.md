@@ -43,15 +43,15 @@ clean [path] - serial destroyer | optional dir to clean: rSyncBackup clean /home
 
 
 The script will run 2 rsync jobs:
-- 1 for remote or One-time only, 
-to a sub folder called -Extras-;
-in verbose mode (-vv) on terminal and minimal log;
-has no default --backup option ;
-has fewer standard exclusions. Hence is more dangerous - (anyway the backup storage is always excluded);
-can run Onetime only without or along with -Full backup-;
-will run excluding the Full backup if a path was specified as rSyncBackup argument;
-can run as basic non-root user;
-won't allow to backup the root / of the filesystem ;
+* 1 for remote or One-time only, 
+- [ ] to a sub folder called -Extras-;
+- [ ] in verbose mode (-vv) on terminal and minimal log;
+- [ ] has no default --backup option ;
+- [ ] has fewer standard exclusions. Hence is more dangerous - (anyway the backup storage is always excluded);
+- [ ] can run Onetime only without or along with -Full backup-;
+- [ ] will run excluding the Full backup if a path was specified as rSyncBackup argument;
+- [ ] can run as basic non-root user;
+- [ ] won't allow to backup the root / of the filesystem ;
 
 - 1 to mirror your chosen subfolders of  “/”, is the -Full backup-:
 has a new folder every month -02.2019- for February;
