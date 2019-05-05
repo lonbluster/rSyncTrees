@@ -58,7 +58,7 @@
 
 ## The first time you run it, it will:
 - ask you to choose or create a backup directory in your home; it will create the 3 subdirs: 1 for synchronization, 1 for backup, 1 for onetime/remote jobs;
-- create an exclude EXCbackup.txt with  and an include INCbackup.txt file in your home, with common ex/inclusions. If you delete them it will recreate them. Also oneEXCbackup.txt is created when Onetime backup runs.
+- create an exclude EXCbackup.txt with  and an include INCbackup.txt file in your home, with common ex/inclusions. If you delete them it will recreate them, unless you have configured the rsbHOME variable on some specific directory. Also oneEXCbackup.txt is created when Onetime backup runs.
 
 
 ## At every run it will:
@@ -72,3 +72,6 @@
 - create a backup log with end date in the name, and deliver the most recent to the backup directory.
 - allow to insert other rsync options (man rsync).
 - use "mailx" to send a mail to the server and address specified in the /etc/.rsyncbackup with the log attached
+
+## More from the author
+https://lonblu.wordpress.com/2019/04/12/rsyncrestore-restore-linux-rsync-backups/
