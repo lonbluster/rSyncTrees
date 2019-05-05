@@ -39,7 +39,7 @@ old [pattern] - query/remove previous versions | optional grep pattern filter: r
 
 clean [path] - serial destroyer | optional dir to clean: rSyncBackup clean /home/you/folder
 
-* - invalid
+'*' - invalid
 
 
 The script will run 2 rsync jobs:
@@ -62,7 +62,7 @@ has the backup option to put previous files versions in folder -Previous- with a
 will run only as root user.
 
 - BOTH jobs  
- the modified files in this folder have suffix of the hour backup time most recent after the file was modified: hence there can be a new file every hour;
+the modified files in this folder have suffix of the hour backup time most recent after the file was modified: hence there can be a new file every hour;
 ask what dir/file to backup, validate it exists; and ask you to make it permanent for next backups;
 ask whether to exclude something from the current backup; and whether to make it permanent;
 are bound to exclusion files;
@@ -70,8 +70,8 @@ will display the size of the inclusions and exclusions in MB;
 are able to run non-interactively as crontab job (use #crontab -e) or as nohup;
 
 The first time you run it, it will:
--ask you to choose or create a backup directory in your home; it will create the 3 subdirs: 1 for synchronization, 1 for backup, 1 for onetime/remote jobs;
--create an exclude EXCbackup.txt with  and an include INCbackup.txt file in your home, with common ex/inclusions. If you delete them it will recreate them. Also oneEXCbackup.txt is created when Onetime backup runs.
+- ask you to choose or create a backup directory in your home; it will create the 3 subdirs: 1 for synchronization, 1 for backup, 1 for onetime/remote jobs;
+- create an exclude EXCbackup.txt with  and an include INCbackup.txt file in your home, with common ex/inclusions. If you delete them it will recreate them. Also oneEXCbackup.txt is created when Onetime backup runs.
 
 
 At every run it will:
