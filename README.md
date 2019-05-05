@@ -3,7 +3,7 @@
 
 #### Rsync should be installed!
 
-Optional Variables:
+## Optional Variables:
 
 - STORAGE=/the/main/disk/with/space
 - otherStorage=/disk/with/space
@@ -15,7 +15,7 @@ Optional Variables:
 - minGbfree=9 #by default disk space remaining triggering warning
 
 
-Command Line [Options] for #rSyncBackup 
+## Command Line [Options] for #rSyncBackup 
 - [x] [/dir/path] - short for ONEtime backup - displays ordered size of subfolders or files with similar name
 - [x] du  - show Sync dir usage
 - [x] due - for the Extras dir
@@ -30,39 +30,39 @@ Command Line [Options] for #rSyncBackup
 - [x] '*' - invalid
 
 
-The script will run 2 rsync jobs:
-* 1 for remote or One-time only, 
-- [ ] to a sub folder called -Extras-
-- [ ] in verbose mode (-vv) on terminal and minimal log
-- [ ] has no default --backup option ;
-- [ ] has fewer standard exclusions. Hence is more dangerous - (anyway the backup storage is always excluded);
-- [ ] can run Onetime only without or along with -Full backup-;
-- [ ] will run excluding the Full backup if a path was specified as rSyncBackup argument;
-- [ ] can run as basic non-root user;
-- [ ] won't allow to backup the root / of the filesystem ;
+## The script will run 2 rsync jobs:
+- 1 for remote or One-time only, 
+  - to a sub folder called -Extras-
+  - in verbose mode (-vv) on terminal and minimal log
+  - has no default --backup option ;
+  - has fewer standard exclusions. Hence is more dangerous - (anyway the backup storage is always excluded);
+  - can run Onetime only without or along with -Full backup-;
+  - will run excluding the Full backup if a path was specified as rSyncBackup argument;
+  - can run as basic non-root user;
+  - won't allow to backup the root / of the filesystem ;
 
 - 1 to mirror your chosen subfolders of  “/”, is the -Full backup-:
-has a new folder every month -02.2019- for February;
-runs in info mode on terminal and delivers detailed log;
-backups / with --include-from-file=//INCbackup.txt, and with standard exclusions;
-is optimized for SMB storage; 
-has the backup option to put previous files versions in folder -Previous- with a new date suffix every hour (that is, supposing you modify the file and back it up every hour);
-will run only as root user.
+  - has a new folder every month -02.2019- for February;
+  - runs in info mode on terminal and delivers detailed log;
+  - backups / with --include-from-file=//INCbackup.txt, and with standard exclusions;
+  - is optimized for SMB storage; 
+  - has the backup option to put previous files versions in folder -Previous- with a new date suffix every hour (that is, supposing you modify the file and back it up every hour);
+  - will run only as root user.
 
 - BOTH jobs  
-the modified files in this folder have suffix of the hour backup time most recent after the file was modified: hence there can be a new file every hour;
-ask what dir/file to backup, validate it exists; and ask you to make it permanent for next backups;
-ask whether to exclude something from the current backup; and whether to make it permanent;
-are bound to exclusion files;
-will display the size of the inclusions and exclusions in MB;
-are able to run non-interactively as crontab job (use #crontab -e) or as nohup;
+  - the modified files in this folder have suffix of the hour backup time most recent after the file was modified: hence there can be a new file every hour;
+  - ask what dir/file to backup, validate it exists; and ask you to make it permanent for next backups;
+  - ask whether to exclude something from the current backup; and whether to make it permanent;
+  - are bound to exclusion files;
+  - will display the size of the inclusions and exclusions in MB;
+  - are able to run non-interactively as crontab job (use #crontab -e) or as nohup;
 
-The first time you run it, it will:
+## The first time you run it, it will:
 - ask you to choose or create a backup directory in your home; it will create the 3 subdirs: 1 for synchronization, 1 for backup, 1 for onetime/remote jobs;
 - create an exclude EXCbackup.txt with  and an include INCbackup.txt file in your home, with common ex/inclusions. If you delete them it will recreate them. Also oneEXCbackup.txt is created when Onetime backup runs.
 
 
-At every run it will:
+## At every run it will:
 - if the backup directory is not found it can backup to an alternative storage, defined in /etc/.rsyncbackup; 
 - never create directories if the storage is not defined, but only as subdirs of the Storage;
 - allow to run a one-time backup of the chosen path, remote or local;
