@@ -81,6 +81,6 @@ The vbackup script does already a job in saving the partition table and backing 
 It will be incorporated in rSyncBackup eventually.
 
 Many restore situations have not been tested, including managing new file permissions, and some symbolic links.
-Also the default inclusions do not include library directories too big to manage (/usr, /lib, lib64 ). For now, one is supposed to reinstall Linux and restore the files and directories needed.
-
-
+Also the default inclusions do not include library directories that do not contain any user data (/usr, /lib, lib64 ). Anyhow if they get deleted your system may be broke, so you want to always have a Onetime sync of those, at least.
+For now, one is supposed to reinstall Linux and restore the files and directories needed. 
+Share your reports and suggestions for a more automated restore tool for Linux.
