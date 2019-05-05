@@ -1,5 +1,5 @@
 # rSyncBackup.sh
-### Created on BackBox (Ubuntu), tested in Debian, Suse, CentOS, Windows-SL
+### :+1: Created on BackBox (Ubuntu), tested in Debian, Suse, CentOS, Windows-SL :+1:
 
 #### Rsync should be installed!
 
@@ -16,36 +16,24 @@ Optional Variables:
 
 
 Command Line [Options] for #rSyncBackup 
-
-[/dir/path] - short for ONEtime backup - displays ordered size of subfolders or files with similar name
-
-du  - show Sync dir usage
-
-due - for the Extras dir
-
-dup - for the Previous dir
-
-duA - list all storage subfolders
-
-Rs - restores files and directories 
-
-rp - creates gz.tar of the sync directory
-
-Rrp - restores the rp to a folder or to current sync dir
-
-speed - test rsync backup on configured storage
-
-old [pattern] - query/remove previous versions | optional grep pattern filter: rSyncBackup old mtab_[0-3][0-9]
-
-clean [path] - serial destroyer | optional dir to clean: rSyncBackup clean /home/you/folder
-
-'*' - invalid
+- [x] [/dir/path] - short for ONEtime backup - displays ordered size of subfolders or files with similar name
+- [x] du  - show Sync dir usage
+- [x] due - for the Extras dir
+- [x] dup - for the Previous dir
+- [x] duA - list all storage subfolders
+- [x] Rs - restores files and directories 
+- [x] rp - creates gz.tar of the sync directory
+- [x] Rrp - restores the rp to a folder or to current sync dir
+- [x] speed - test rsync backup on configured storage
+- [x] old [pattern] - query/remove previous versions | optional grep pattern filter: rSyncBackup old mtab_[0-3][0-9]
+- [x] clean [path] - serial destroyer | optional dir to clean: rSyncBackup clean /home/you/folder
+- [x] '*' - invalid
 
 
 The script will run 2 rsync jobs:
 * 1 for remote or One-time only, 
-- [ ] to a sub folder called -Extras-;
-- [ ] in verbose mode (-vv) on terminal and minimal log;
+- [ ] to a sub folder called -Extras-
+- [ ] in verbose mode (-vv) on terminal and minimal log
 - [ ] has no default --backup option ;
 - [ ] has fewer standard exclusions. Hence is more dangerous - (anyway the backup storage is always excluded);
 - [ ] can run Onetime only without or along with -Full backup-;
