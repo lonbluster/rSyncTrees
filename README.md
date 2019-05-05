@@ -75,3 +75,12 @@
 
 ## More from the author
 https://lonblu.wordpress.com/2019/04/12/rsyncrestore-restore-linux-rsync-backups/
+
+## Missing and developing features
+The vbackup script does already a job in saving the partition table and backing up live mysql servers. 
+It will be incorporated in rSyncBackup eventually.
+
+Many restore situations have not been tested, including managing new file permissions, and some symbolic links.
+Also the default inclusions do not include library directories too big to manage (/usr, /lib, lib64 ). For now, one is supposed to reinstall Linux and restore the files and directories needed.
+
+
