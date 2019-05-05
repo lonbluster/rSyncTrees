@@ -22,9 +22,6 @@ old [pattern] - query/remove previous versions | optional grep pattern filter: r
 clean [path] - serial destroyer | optional dir to clean: rSyncBackup clean /home/you/folder
 * - invalid
 
---------Q and backup.Press Q or q. Q and Enter 2 or more times to backup.---------
-Q to quit this Help and continue to backup.
-
 rSyncBackup.sh
 Created on BackBox (Ubuntu), tested in Debian, Suse, CentOS, Windows-SL
 Rsync should be installed!
