@@ -1,27 +1,49 @@
 # rSyncBackup.sh
 Optional Variables:
+
 STORAGE=/the/main/disk/with/space
+
 otherStorage=/disk/with/space
+
 rsbHOME=/any/dir/forLogsAndConfig
+
 HELP=off
+
 ttestMb=555 #by default transfer speed
+
 forward_mail=user@domain.ext
+
 smtp_server=mail@domain.ext(:25)
+
 minGbfree=9 #by default disk space remaining triggering warning
 
+
 Command Line [Options] for #rSyncBackup 
+
 [/dir/path] - short for ONEtime backup - displays ordered size of subfolders or files with similar name
+
 du  - show Sync dir usage
+
 due - for the Extras dir
+
 dup - for the Previous dir
+
 duA - list all storage subfolders
+
 Rs - restores files and directories 
+
 rp - creates gz.tar of the sync directory
+
 Rrp - restores the rp to a folder or to current sync dir
+
 speed - test rsync backup on configured storage
+
 old [pattern] - query/remove previous versions | optional grep pattern filter: rSyncBackup old mtab_[0-3][0-9]
+
 clean [path] - serial destroyer | optional dir to clean: rSyncBackup clean /home/you/folder
+
 * - invalid
+
 
 Created on BackBox (Ubuntu), tested in Debian, Suse, CentOS, Windows-SL
 Rsync should be installed!
