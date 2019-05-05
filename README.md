@@ -50,7 +50,6 @@
   - will run only as root user.
 
 - BOTH jobs  
-  - the modified files in this folder have suffix of the hour backup time most recent after the file was modified: hence there can be a new file every hour;
   - ask what dir/file to backup, validate it exists; and ask you to make it permanent for next backups;
   - ask whether to exclude something from the current backup; and whether to make it permanent;
   - are bound to exclusion files;
