@@ -83,6 +83,7 @@ https://lonblu.wordpress.com/2019/04/12/rsyncrestore-restore-linux-rsync-backups
 ## Missing and developing features
 
 Compared to Timeshift, which looks like a valid Full backup solution, rSyncTrees can write to SMB storage, beside presenting a different approach to version restore.
+https://github.com/teejee2008/timeshift
 
 Many restore situations have not been tested, including managing new file permissions, and some symbolic/hard links (the Full backup is actually archiving those links, that is, copying the source).
 Also the default inclusions do not include the huge software library directories (/usr, /lib, lib64) that store no user/system new data. Anyhow if they get deleted your system may be broke, so you want to always have a Onetime sync of those, at least.
