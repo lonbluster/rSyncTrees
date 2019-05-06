@@ -1,4 +1,4 @@
-# rSyncTrees.sh
+# rSyncTrees.sh - Backup & Restore Linux files and folders
 ### :+1: Created on BackBox (Ubuntu), tested in Debian, Suse, CentOS, Windows-SL :+1:
 
 #### Rsync should be installed!
