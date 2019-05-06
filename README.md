@@ -5,10 +5,7 @@
 
 Have rSyncTrees executable in your system (optional, better):
 - [ ] chmod +x /your/path/rSyncTrees.sh
-then
-- [ ] ln -s /your/path/rSyncTrees.sh  /sbin/rSyncTrees
-or 
-- [x] mv /your/path/rSyncTrees.sh  /sbin/rSyncTrees
+- [ ] mv /your/path/rSyncTrees.sh  /sbin/rSyncTrees
 
 ## Optional Variables:
 
