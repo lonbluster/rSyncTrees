@@ -81,11 +81,13 @@ Have rSyncTrees executable in your system (optional, better):
 https://lonblu.wordpress.com/2019/04/12/rsyncrestore-restore-linux-rsync-backups/
 
 ## Missing and developing features
-
-Compared to Timeshift, which looks like a valid Full backup solution, rSyncTrees can write to SMB storage, beside presenting a different approach to version restore.
+This lightweight script was created before the author could find valid and stable softwares like Backintime and Timeshift.
+Timeshift looks like a valid Full backup solution, and Backintime supports SMB storage like rSyncTrees does.
 https://github.com/teejee2008/timeshift
+https://github.com/bit-team/backintime
+But if you prefer avoiding extra software dependencies then try rSyncTrees...
 
-Many restore situations have not been tested, including managing new file permissions, and some symbolic/hard links (the Full backup is actually archiving those links, that is, copying the source).
+Many restore situations have not been tested, including managing new restore permissions, and some symbolic/hard links (the Full backup is actually archiving those links, that is, copying the source).
 Also the default inclusions do not include the huge software library directories (/usr, /lib, lib64) that store no user/system new data. Anyhow if they get deleted your system may be broke, so you want to always have a Onetime sync of those, at least.
 
 For now, one is supposed to reinstall Linux and restore the files and directories needed. 
