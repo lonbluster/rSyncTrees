@@ -1,7 +1,7 @@
 #!/bin/bash
 #set -x
 custom_config=/etc/.rsynctrees
-##Always better to have the config file  in place with the variables shown on the help.
+##Always better to have the config file in place with the variables shown on the help.
 ##All colors with names
 RED=$'\e[31m'
 BLUE=$'\e[36m'
@@ -12,28 +12,30 @@ RESET=$'\e[0m'
 INVERT=$'\e[7m'
 YELLOW=$'\e[93m'
 
-if [[ -f "$custom_config" ]]; then
-source $custom_config ;
-fi
+//#magenta
+[[ -f "$custom_config" ]] && source $custom_config
+
 if [[ -d "$STORAGE" ]] ;  
 	then rsync_root=$(echo $STORAGE | sed 's:/*$::') ; 
-#if STORAGE is set variable is set withouth trailing /
+#if STORAGE is set, variable is set withouth trailing /
 #sed could be replaced by "echo ${STORAGE%/}"
-#2 alternative storages,  and 1 extra var, and HOME
+#2 alternative storages, and 1 extra var, and HOME
 else  
-		if [[ -d "$otherStorage" ]]; then  #if is not empty
+		if [[ -d "$otherStorage" ]]; then
 			rsync_root=$otherStorage; 
 		else		
 			rsync_root=${HOME}/backup; 
 		fi
 fi
+//#
+
 
 if [[ -z "$rstHOME" ]] || [[ ! -d "$rstHOME" ]] || [[ ! -w "$rstHOME" ]]; then 
 	rstHOME=$HOME/rSyncTrees ; 
 	if [[ ! -d "$rstHOME" ]]; then mkdir $rstHOME ; fi
 fi
 # Check write acces on Config dir/Create the config dir specified on the config file, or as subfolder in Home , 
-#Default transfer size for speed measurement
+#Default transfer size for speed measurement from .rsynctrees
 if [[ -z "$ttestMb" ]]; then 
 ttestMb=555; 
 fi
@@ -42,7 +44,8 @@ backup_root=${rsync_root}/$(hostname)
 month=$(date +%m.%Y)
 starthour=$(date +%d%h_%H:%M)
 bkdate=$(date +.rST_%d%h_h%H)
-gbFree=$(df -h $rsync_root | awk '{print $4}')
+#gbFree=$(df -h $rsync_root | awk '{print $4}')
+lastmonth=$(date --date='-1 month' +'%m.%Y')
 
 ####Interactive#########################
 #if Rsync and bash and nano do not start well on SMB fs , better changing base dir. cd $HOME
@@ -55,8 +58,10 @@ if tty -s ; then clear && cd $HOME;
 #list available file systems on their mountpoints, with % available and GB remaining
 		df -H --output=target,pcent,avail,source
 		echo -e "\n - Input your capient $RED$U_LINED STORAGE FOLDER $RESET full path, \n - or type $U_LINED backup $RESET for /home/you/backup... \n - or run as root to enable otherStorage in /etc/.rsynctrees. \n"
-		read -e -r store #read#
+		read -e -r store 
+	#read variable
 			if [[ -n "$store" ]]; then  
+		#or- if [[ ! -z ${store} ]] ?
 #if input is given
 #and is a valid path , create necessary subdirs and refresh previous vars, or show invalid message
 				if [[ "$store" == backup ]]; then  
@@ -70,6 +75,7 @@ if tty -s ; then clear && cd $HOME;
 			fi
 	elif [[ ! -d "$backup_root" ]]; then mkdir -v $backup_root; 
 	fi
+#
 fi
 ####Interactive#########################
 
@@ -86,7 +92,8 @@ cleaner ()
 			{
 			echo -e "$hdROSE"r"$RESET""$GREEN""$U_LINED"Sync"$RESET"{"$BLUE"Back,Clean,"$RED"Rest"$RESET"}{"$GREEN"up,"$GREEN"ore"$RESET"}
 			echo -e "$hdROSE"@@"$RESET""$GREEN"Sync"$RESET"{"$BLUE"Back,"$YELLOW"Clean,"$RED"Rest"$RESET"}{"$GREEN"%%,"$YELLOW"##"$RESET"}
-
+##banner colored
+## function to input  new dir, or setting default
 			prompt ()	
 				{   
 					echo -e "\r"
@@ -102,12 +109,12 @@ cleaner ()
 				}
 			
 			if [[ -d "$1" ]] || [[ -f "$1" ]]; then cleandir=$1; else prompt; fi
+
 			while [[ $newdir != 'q' ]]; do
 			prompt
+# unless  you quit return to  prompt
+# remove trailing  and show size
 			cleandir=$(echo $cleandir | sed 's:/*$::'); 				
-				# while [[ -z $cleandir ]] || [[ ! -d $cleandir ]]; do 
-				# echo "Input something else.."; prompt; 
-				# done	
 				echo -e "\r $RESET"
 				du -sh ${cleandir}/*  | sort -hk1
 				echo -e "\r $RED"
@@ -141,6 +148,10 @@ if tty -s; then
 	if [ -n "$1" ]; then echo -e "\r $U_LINED..rSyncTrees cmd Options..$RESET "
 		
 		case $1 in
+		-*)
+		argu=$1
+		;;
+
 		duA)
 			echo -e "$hdROSE Disk usage for Machine trees in $YELLOW $backup_root :"
 			ls -lh $backup_root
@@ -176,6 +187,7 @@ if tty -s; then
 			sleep 1
 			exit
 			;;
+			
 		du)
 			echo -e " $hdROSE Disk usage for the Sync tree \r$RESET $YELLOW \v $sync_dir"
 			ls -lh $sync_dir
@@ -187,6 +199,21 @@ if tty -s; then
 			done | sort -hk1
 			echo -e "\r $RESET"
 			exit
+			;;
+			
+		exlogs)
+			read -r -p "$YELLOW ...Enter to keep latest 15 logs only in .tgz ?$RESET"
+			mv ${rstHOME}/exLogs.tgz ${rstHOME}/${starthour}_exLogs.tgz 
+			cd ${rstHOME} &&	ls -t ./Bkup_date-* | head -15 | xargs tar -cz -f ${rstHOME}/exLogs.tgz && rm ${rstHOME}/Bkup_date-*.log
+			echo -e "Previous tar list: $hdROSE"
+			tar --list -f ${rstHOME}/${starthour}_exLogs.tgz
+			echo -e "$RESET Compressed tar list exLogs.tgz: $hdROSE"
+			tar --list -f ${rstHOME}/exLogs.tgz
+			echo -e "$RESET Config Dir: $YELLOW ${rstHOME}"
+			echo -e "Content: $RED"
+			du -h ${rstHOME}/*
+			echo -e "$RESET"
+ 			exit
 			;;
 			
 		old)
@@ -201,36 +228,39 @@ if tty -s; then
 					filter=$2; 
 				else
 					echo -e "$YELLOW $U_LINED any $RESET$YELLOW string to match...\n$GREEN@ _1[0-2] for day 10 to 12 @\n@ _[0-1][0-9] for day 01 to 19 @ \n@ _[0-3]1 for days 01,11,21,31 @ $RESET"
+
 					read -e filter
 				fi
 			echo -e "any specific day of month...? $RESET"; 
 			read -t 5 day
 	
-			match=*_[0-3][0-9]*_h*
+			oldmatch=*_[0-3][0-9]*_h*
 			#too vague, should be more specific  
-			newmatch=*.rST_*
+			match=*.rST_*
 			
 			echo -e "...using find match $GREEN $match $RESET"
+			if [[ -n $filter ]]; then echo -e "..using grep filter $GREEN $filter $RESET"; fi 
+
 			sleep 1
 			#if [ -z $filter ]; then match="$previous"; fi
 			echo "$RED Remove? y and Enter... $RESET"
 			read -t 3 remove
 			echo -e "\r $GREEN Searching $previous... $RESET"
-		
+
 			found ()
 			{
 			 find $previous -type f -name "$match"
 			}
 			
 	 		_filter=$filter
-			if [[ $remove =~ ^[Yy]$ ]]; then
+		if [[ $remove =~ ^[Yy]$ ]]; then
 				if [[ -z $filter ]]; then echo "Use string match for removing stuff."; exit; 
 				else
 					for item in $(found|grep $_filter); do
 						echo -e "$GREEN REMOVING $item $RESET"; rm -vf $item; 
 					done
 				fi
-			else 
+		else 
 			if [[ -z $day ]] && [[ -z $filter ]]; then 
 	#if both filter and day are not set			
 			echo "Listing all previous files"; sleep 2; 
@@ -238,22 +268,35 @@ if tty -s; then
 			fi
 			if [[ -z $day ]] && [[ -n $filter ]]; then 
 	#if day is not set and filter is
-			echo -e "..using grep filter $GREEN $filter $RESET"
+			echo -e "..using grep filter $GREEN $filter $RESET"; sleep 2;
 			found |grep $_filter;
 			fi
 			if [[ -n $day ]] && [[ -z $filter ]]; then 
 	#if day is set and filter is empty
-				echo -e "..using grep filter $GREEN _$day $RESET"
+				echo -e "..using grep filter $GREEN _$day $RESET"; sleep 2;
 				found |grep _$day;
 			fi
 			if [[ -n $day ]] && [[ -n $filter ]]; then
 	#if both are set
 			echo -e "..using grep filter $GREEN $filter $RESET"
-			echo -e "..using grep filter $GREEN _$day $RESET"
+			echo -e "..using grep filter $GREEN _$day $RESET"; sleep 2;
 			found | grep $_filter | grep _$day ; 
 			fi
-			fi
-					sleep 3
+		fi
+		# echo "$RED Remove files older than 2 months? y or n.# of months to keep Enter... $RESET"
+		# read -t 3 removeold
+		# echo -e "\r $GREEN Searching and Deleting old files $previous... $RESET"
+				# sleep 3
+			# if [[ $removeold =~ ^[Yy]$ ]]; then
+						# matchOld=
+			# OldFiles ()
+			# {
+			 # find $previous -type f -name "$matchOld"
+			# }
+					# for item in $(OldFiles|grep $_filter); do
+						# echo -e "$GREEN REMOVING $item $RESET"; rm -vf $item; 
+					# done
+			# fi
 					exit
 					;;
 	
@@ -322,6 +365,10 @@ if tty -s; then
 			fi 
 				#echo -e "\r\e[0m   ..exclude?:"
 			;;
+
+		help) 
+			HELP=on
+			;;
 				
 		*) 	if [[ -d $1 ]] || [[ -f $1 ]] || [[ "$1" == *@*:* ]]; then 
 				cmd_path=$1; 
@@ -332,7 +379,10 @@ if tty -s; then
 	old [pattern]: manage and remove previous versions \n \
 	Rs : Restore files and directories \n \
 	rp/Rrp : Recovery point creation and restore \n \
-	speed : write test to Storage \n or \
+	exlogs : expire logs in config dir \n \
+	speed : write test to Storage \n \
+	help : activates help if was off \n \
+	-* : (man rsync Options :-) runs faster than with no options \n \
 	[/valid/path]...$RESET" && exit 1; 
 			fi	
 		esac 
@@ -366,9 +416,16 @@ fi
 #-####HELP
 
 HELPless=("# rSyncTrees.sh
-### :+1: Created on BackBox (Ubuntu), tested in Debian, Suse, CentOS, Windows-SL :+1:
+### :+1: Created on BackBox (Ubuntu), tested in Debian, Suse, CentOS, Windows-SL, Pfsense :+1:
 
-#### Rsync should be installed!
+--------Q and backup.Press Q or q. Q and Enter 2 or more times to backup.---------
+Q to quit this Help and continue to backup.
+
+@@@@@@@@@@This message will be disable when HELP=off in /etc/.rsynctrees.
+
+#Requirements for rSyncTrees
+#### 'Rsync' should be installed! And 'Bash' too! 
+Also 'mailx' if you mind to configure the mail sending variables.
 
 Have rSyncTrees executable in your system (optional, better):
 - [ ] chmod +x /your/path/rSyncTrees.sh
@@ -398,6 +455,8 @@ Have rSyncTrees executable in your system (optional, better):
 - [x] speed - test rsync backup on configured storage
 - [x] old [pattern] - query/remove previous versions | optional grep pattern filter: rSyncTrees old mtab_[0-3][0-9]
 - [x] clean [path] - serial destroyer | optional dir to clean: rSyncTrees clean /home/you/folder
+- [x] exlogs - will compress in a .tgz file the latest 15 logs and delete the rest
+- [x] help - reactivate help
 - [x] '*' - invalid
 
 
@@ -442,7 +501,7 @@ Have rSyncTrees executable in your system (optional, better):
 - otherwise synchonize the included files/dirs to the monthly folder (and delete files no longer present); backup the changes to the “previous” backup directory; backup the extra input to the extra folder.
 - create a backup log with end date in the name, and deliver the most recent to the backup directory.
 - allow to insert other rsync options (man rsync).
-- use "mailx" to send a mail to the server and address specified in the /etc/.rsynctrees with the log attached
+- use 'mailx' to send a mail to the server and address specified in the /etc/.rsynctrees with the log attached
 
 ## More from the author
 https://lonblu.wordpress.com/2019/04/12/rsyncrestore-restore-linux-rsync-backups/
@@ -458,6 +517,11 @@ For now, one is supposed to reinstall Linux and restore the files and directorie
 Share your reports and suggestions for a more automated restore tool for Linux.
 
 The serial destroyer will soon be handling multiple selections...
+
+@@@@@@@@@@This message will be disable when HELP=off in /etc/.rsynctrees.
+
+--------Q and backup.Press Q or q. Q and Enter 2 or more times to backup.---------
+Q to quit this Help and continue to backup.
 
 "
 )
@@ -495,17 +559,17 @@ list_bytes()
 	{
 	extradir=$(echo $extradir | sed 's:/*$::')  
 ##Rules out the input of / alone, and cleans trailing
-#unless provided on  command line, a restore path needs be seized
+#unless provided on command line, a restore path needs be seized
 	while [[ -z "$extradir" ]] ; do 
 		echo "Input something specific"; prompt_dir; 
 	done	
 	
 	if [[ "$Rs" == 1 ]]; then
-		while [[ ! -f "$extradir" ]] && [[ ! -f ${sync_dir}/"$extradir" ]] && [[ ! -f ${extras}/"$extradir" ]] && [[ ! -f ${previous}/"$extradir" ]] && [[ ! -d "$extradir" ]] && [[ ! -d ${sync_dir}/"$extradir" ]] && [[ ! -d ${extras}/"$extradir" ]] ; do 
+		while [[ ! -f "$extradir" ]] && [[ ! -f ${sync_dir}/"$extradir" ]] && [[ ! -f ${extras}/"$extradir" ]] && [[ ! -f ${previous}/"$extradir" ]] && [[ ! -d "$extradir" ]] && [[ ! -d ${sync_dir}/"$extradir" ]] && [[ ! -d ${extras}/"$extradir" ]]  ; do 
 			echo -e "$RED ${extradir} $RESET: No File or Directory found on Storage or System."; exit
 					#unset extradir; unset cmd_path; unset 2; unset 1; prompt_dir  #
 		done
-#check the presence of the file somewhere, in all storage trees, and and on running system
+#check the presence of the file somewhere, in all storage trees, and on running system
 #check that a full path was given, U&e! ...this will need be repeated for Full backups later on.
 		while [[ ! "${extradir}" = /* ]] || [[ "${extradir}" = . ]]; do 
 			echo "Always use full local paths !!";  echo "$RED $extradir invalid...U&e! $RESET"; exit  
@@ -514,42 +578,47 @@ list_bytes()
 #set -x	
 	echo -e "$GREEN Listing Bytes...";
 	if [[ -d "$extradir" ]] || [[ -d ${sync_dir}/"$extradir" ]] || [[ -d ${extras}/"$extradir" ]]; then 
-			echo -e "\r Listing DIR"
+			echo -e "\r Listing DIR to restore"
 			for dir in ${extradir}/*; do
 			timeout 3 du -sh $dir || echo "THICK:"$dir ; 
 			done | sort -hk1
 			echo -e "\r $RESET"
 			echo -e "\r"
-			echo -e "$U_LINED++Selected on current system:$RESET$GREEN"
+			echo -e "$U_LINED++Selected on current system:$RESET"
 			timeout 3 du -sh $extradir || ls -d $extradir
-			echo -e "$U_LINED++Same directory synchronized on Storage:$RESET$GREEN"
+			echo -e "$GREEN$U_LINED++Same directory synchronized on Storage:$RESET"
 			if [[ -d ${sync_dir}$extradir ]]; then timeout 10 du -sh ${sync_dir}$extradir || ls -d ${sync_dir}$extradir; fi
 			echo -e "$RED"
 			echo -e "$U_LINED++Previous versions: $RESET$RED"
 			if [[ -d ${previous}$extradir ]]; then timeout 10 du -sh ${previous}$extradir || ls -d ${previous}$extradir ; fi
 			if [[ -d ${previous}/extras"$extradir" ]]; then timeout 10 du -sh ${previous}/extras"$extradir" || ls -d ${previous}/extras"$extradir"; fi
+			if [[ -d ${backup_root}/${lastmonth}$extradir ]]; then timeout 10 du -sh ${backup_root}/${lastmonth}$extradir || ls -d ${backup_root}/${lastmonth}$extradir; fi
+			echo -e "$RED"
 			echo -e "$U_LINED++Extra copies: $RESET$RED"			
 			if [[ -d ${extras}$extradir ]]; then timeout 10 du -sh ${extras}$extradir || ls -d ${extras}$extradir ; fi
 					echo -e "$RESET"
 #show all versions found for the same dir
 #and all versions for the same file
 		else 
-			echo -e "\r Listing FILE"
+			echo -e "\r Listing FILE to restore"
 			echo -e "\r"
-			echo -e "$U_LINED++On current system: $RESET$GREEN"
+			echo -e "$RESET $U_LINED++On current system: $RESET"
 			ls -lh ${extradir}*; 
-			echo -e "$U_LINED++Same file synchronized on Storage:$RESET$GREEN"
-			if [ -f ${sync_dir}$extradir ];then ls -lh ${sync_dir}$extradir;
-			echo -e "\r $RED"
-			echo -e "$U_LINED++Previous and Similar:$RESET$RED"
-			ls -lh ${previous}${extradir}*; 
-			ls -lh ${previous}/extras${extradir}*; 
+			echo -e "$GREEN$U_LINED++Same file synchronized on Storage:$RESET"
+			if [ -f ${sync_dir}$extradir ];then 
+				ls -lh ${sync_dir}$extradir;
+				echo -e "\r $RED"
+				echo -e "$U_LINED++Previous and Similar:$RESET$RED"
+				[ -f ${previous}${extradir} ] && ls -lh ${previous}${extradir}*; 
+				[ -f ${previous}/extras${extradir} ] && ls -lh ${previous}/extras${extradir}*; 
+				[ -f ${backup_root}/${lastmonth}${extradir} ] && ls -lh ${backup_root}/${lastmonth}${extradir}*;
 			fi	
 			echo -e "$U_LINED++Extra:$RESET$RED"
 			if [ -f ${extras}$extradir ];then ls -lh ${extras}$extradir; fi
 			echo -e "$RESET"
 		fi
 }
+#end list_bytes function
 #set -x
 
 			
@@ -564,7 +633,7 @@ if tty -s; then
 		prompt_dir
 #check if root and display prompt	
 #and help display, unless disabled on config file
-		if [[ ! $HELP == "off" ]]; then echo -e "$RESET"; echo "$HELPless" | less ; fi
+		if [[ ! $HELP == "off" ]]; then echo -e "$RED"; echo "$HELPless" | less ; fi
 	
 ########
 ############
@@ -581,8 +650,35 @@ if tty -s; then
 				echo -e " Did you mean $YELLOW $(echo $2 | grep -oP "^${backup_root}\K.*") ? \n Please remove the Storage path and suffixes as well. $RESET"; 
 				exit
 			fi
-			list_bytes
+#check if other copies are in other storages
+			old_sync_dir=$sync_dir
+			old_extras=$extras
+			old_previous=$previous
+			old_backup_root=$backup_root
+			if [[ -n "$otherStorage" ]] && [[ -d "$otherStorage" ]]; then 
+				echo -e " $YELLOW---- Selecting OTHER backup storages ----$RESET";
+				sync_dir=$otherStorage/$(hostname)/$month
+				extras=$otherStorage/$(hostname)/extras
+				previous=$otherStorage/$(hostname)/previous
+				backup_root=$otherStorage/$(hostname)
+				echo -e "$RED $backup_root $RESET";
+#replace list_bytes variables before executing, and after
+				list_bytes; 
+				echo -e "$YELLOW---- Change default backup storage to restore the above ! ----";
+				echo -e "\r --------------------------$RESET";
+			fi
+			sync_dir=$old_sync_dir
+			extras=$old_extras
+			previous=$old_previous
+			backup_root=$old_backup_root
 			#set -x
+			echo -e "\r"
+#list restorable from current storage
+			echo -e " ======== Selecting CURRENT storage ======== $RESET"
+			echo -e "\r $backup_root";
+			echo -e "\r"
+			list_bytes
+			echo -e "========  ========"
 				echo -e "\n Let s move on to restore one of those...\n$RESET Enter to continue to restore the current system,\n or input alternative $U_LINED RESTORE TARGET:$RESET$GREEN" 
 				read -e restore_fs ; 	
 				echo -e "$RED####################Ok, choose the right one, then..."
@@ -605,7 +701,7 @@ if tty -s; then
 							echo "No Previous copies for Directories. Retry with a file instead."; exit; 
 						fi
 					echo "FILE selected..."			
-						select rfile in  $(ls ${sync_dir}${extradir}*) $(ls ${previous}${extradir}*) $(ls ${extras}${extradir}); do 
+						select rfile in  $(ls ${sync_dir}${extradir}* 2> /dev/null) $(ls ${previous}${extradir}* 2> /dev/null) $(ls ${extras}${extradir} 2> /dev/null) $(ls ${backup_root}/${lastmonth}${extradir}* 2> /dev/null); do 
 #choice needs be made for all similar Files found
 							if [[ $REPLY  =~ ^[Qq]$ ]]; then echo -e "$RESET" && exit; fi
 							du -sh $rfile; echo -e "--------------- \n   ------ \n      --- \n";
@@ -624,7 +720,7 @@ if tty -s; then
 					else
 #or for all Directories found
 					echo "$RESET DIR selected..."			
-						select rdir in $(ls -d ${sync_dir}${extradir}) $(ls -d ${previous}${extradir}) $(ls -d ${extras}${extradir}) ; do 
+						select rdir in $(ls -d ${sync_dir}${extradir} 2> /dev/null) $(ls -d ${previous}${extradir} 2> /dev/null) $(ls -d ${extras}${extradir} 2> /dev/null) $(ls -d ${backup_root}/${lastmonth}${extradir} 2> /dev/null) ; do 
 						if [[ $REPLY =~ ^[Qq]$ ]]; then echo -e "$RESET" && exit ; fi
 							ls -l $rdir; echo -e "---------------\n   ------ \n      --- \n"; 
 							restore=$(echo $rdir | sed 's:/*$::')
@@ -701,7 +797,7 @@ echo -e $stdINC > "$include_file"; fi
 if tty -s; then
 
 		if [[ ! $onetimebk =~ ^[OoRr]$ ]];then 
-			until [[ "${extradir}" == /* ]] || [[ -z "${extradir}" ]]; do 
+			until [[ "${extradir}" == /* ]] || [[ -z "${extradir}" ]] || [[ "${extradir}" == *@*:* ]]; do 
 			echo "Full backups refuse relative paths !!";  echo "$RED $extradir $RESET invalid...$YELLOW U&e! $RESET"; exit  
 			done
 		fi
@@ -776,30 +872,36 @@ if tty -s; then
 			read -t 15 -r -p $'      ...p/P to make them permanent ? - :' permesc  
 		fi
 		if [[ $permesc =~ ^[Pp]$ ]]; then
-		if [[ ! -d $exclu ]] && [[ ! -f $exclu ]]; then
-		echo $exclu":Invalid path won't be excluded"; else
-		echo -e '\r' & echo "$exclu" >> "$exclude_file"; fi
-		if [[ ! -d $exclu2 ]] && [[ ! -f $exclu2 ]]; then
-		echo $exclu2":Invalid path won't be excluded"; else
-		echo -e '\r' & echo "$exclu2" >> "$exclude_file"; fi
-	echo -e " $YELLOW: All Full backup EXCLUSIONS:"
+			if [[ ! -d $exclu ]] && [[ ! -f $exclu ]]; then
+			echo $exclu":Invalid path won't be excluded"; else
+			echo -e '\r' & echo "$exclu" >> "$exclude_file"; 
+			fi
+		
+			if [[ -n $exclu2 ]]; then
+				if [[ ! -d $exclu2 ]] && [[ ! -f $exclu2 ]]; then
+				echo $exclu2":Invalid path won't be excluded"; else
+				echo -e '\r' & echo "$exclu2" >> "$exclude_file"; 
+				fi
+			fi
+		fi
+	echo -e "$YELLOW:: All Full backup EXCLUSIONS ::"
+	else	
+	echo -e "- From Onetime exclusions file:$RED $oneEXC_file $YELLOW" ;
+	for excl in $(cat $oneEXC_file); do
+			if [ ! -d $excl ] && [ ! -f $excl ]; then 
+			echo "NOT THERE:" $excl; else timeout 3 du -sh $excl || echo  $excl; fi; 
+	done;
 	fi
 #read 2 exclusions inputs and show disk usage and ask to make permanent to the exclude file,  
-#then show all active exclusions	
-	else 
-	echo -e "\r $YELLOW - Backup storage excluded:"
+#then show all active exclusions	 
+	echo -e "\r$YELLOW- Backup storage excluded:"
 	if [[ $UID -eq "0" ]]; then
 		timeout 3 du -sh $backup_root || echo $backup_root; 
 		else echo $rsync_root;
 	fi	
 	echo -e "\r"
 
-	echo -e "- From Onetime exclusions file:$RED $oneEXC_file $YELLOW" ;
-		for excl in $(cat $oneEXC_file); do
-			if [ ! -d $excl ] && [ ! -f $excl ]; then 
-			echo "NOT THERE:" $excl; else timeout 3 du -sh $excl || echo  $excl; fi; 
-		done;
-	fi
+
 	
 
 
@@ -809,9 +911,10 @@ if tty -s; then
 	echo -e "\r"
 	#if [[ ! -z "${onetimebk// }" ]]; 
 	
-	echo -e "$YELLOW- This job excludes:"
 	
-	if [ ! -z $exclu ]; then timeout 5 du -sh $exclu || echo  $exclu; fi
+	if [ ! -z $exclu ]; then timeout 5 du -sh $exclu || echo  $exclu; 
+		echo -e "$YELLOW- This job excludes:"
+	fi
 	if [ ! -z $exclu2 ]; then timeout 5 du -sh $exclu2 || echo  $exclu2; fi
 	
 	echo -e '\r'
@@ -830,9 +933,10 @@ if tty -s; then
 		echo -e "$stdEXC"; 
 	fi
 #finally provide examples of optional command line switches
-	echo -e "              $RESET $U_LINED## -0- READY?-##$RESET \n \
-	 $BLUE (--delete  -n ) or other arguments for rsync \n (--debug=del2,acl,backup | -q | --dry-run| --progress -vv --info=ALL4) \n  (Onetime ? -b --backup-dir=$previous/extras --suffix=$bkdate) ? :" ;
+	echo -e "              $RESET $U_LINED## -0- READY to rsync ?-##$RESET \n $BLUE \n --debug=del2,acl,backup | -q | --dry-run \n --progress -vv --info=ALL4 | --whole-file \n - Input other arguments for rsync ? $RESET(departing in 9 seconds..):" ;
+if [ -z $argu ]; then
 	read -t 9 argu
+fi
 	##read variable
 	echo -e '\r'
 	echo -e '\r'
@@ -842,7 +946,9 @@ fi
 
 log="${rstHOME}/backup.log"
 echo $starthour > $log
-stdexc () { for i in $(echo -e $stdEXC); do echo --exclude $i; done }
+stdexc () { 
+	for i in $(echo -e $stdEXC); do echo --exclude $i; done 
+	}
 ##--suffix=$bkdate
 df -H  --output=source,pcent,avail $rsync_root >> $log
 ######################################################
@@ -850,17 +956,24 @@ df -H  --output=source,pcent,avail $rsync_root >> $log
 ###
 ##
 rsync_fs()
-	{ rsync -azLhRb --files-from=$include_file --recursive --backup-dir=$previous --suffix=$bkdate --max-size=321mb --safe-links --munge-links --info=BACKUP2,DEL2,COPY2,PROGRESS2 --exclude-from=$exclude_file --exclude $backup_root --exclude "$exclu" --exclude "$exclu2" $(stdexc) --delete-excluded $argu --log-file=$log --log-file-format="%''B %''i %''l %''b %''o %''n %L" --modify-window=1 / $sync_dir
+	{ rsync -azhRb --files-from=$include_file --recursive --backup-dir=$previous --suffix=$bkdate --max-size=321mb --safe-links --info=BACKUP2,DEL2,COPY2,PROGRESS2 --exclude-from=$exclude_file --exclude $backup_root --exclude "$exclu" --exclude "$exclu2" $(stdexc) --delete-excluded $argu --log-file=$log --log-file-format="%''B %''i %''l %''b %''o %''n %L" --modify-window=1 / $sync_dir
 	}
-##
+#man rsync
+#-b, --backup                make backups (see --suffix & --backup-dir)
 rsync_extra()
-	{ rsync -azLhRvv --recursive --safe-links --munge-links --info=BACKUP2,DEL2,COPY2,PROGRESS2 --exclude-from=$oneEXC_file --exclude $rsync_root --exclude "$exclu" --delete-excluded $argu --log-file=$log $extradir $extras
+	{ rsync -azLhWRvv --recursive --safe-links --munge-links --info=BACKUP2,DEL2,COPY2,PROGRESS2 --exclude-from=$oneEXC_file --exclude $rsync_root --exclude "$exclu" --delete-excluded $argu --log-file=$log $extradir $extras
 	}
+#-a, --archive               archive mode; equals -rlptgoD (no -H,-A,-X)
+#-z, --compress              compress file data during the transfer
+#-L, --copy-links            transform symlink into referent file/dir
+#-h, --human-readable        output numbers in a human-readable format
+#-W, --whole-file            copy files whole (w/o delta-xfer algorithm)
+#-R, --relative              use relative path names
 ##--recursive is needed for rsync to backup / by keeping the original tree in RSYNC execution
 #######################################################
 #
 ###########EXEC#####Onetime/remote to folder Extra#######
-if [[ -f $1 ]] || [[ -d $1 ]]; then extradir=$1 && onetimebk='o'; fi
+if [[ -f $1 ]] || [[ -d $1 ]] || [[ "$1" == *@*:* ]]; then extradir=$1 && onetimebk='o'; fi
 		if [[ ! -z "${extradir// }" ]]; then #if extradir is NOT empty ?
 			echo "$(date +%D" "%r): Beginning backup of input dir $extradir" >> $log
 				if tty -s; then
@@ -868,7 +981,9 @@ if [[ -f $1 ]] || [[ -d $1 ]]; then extradir=$1 && onetimebk='o'; fi
 				echo -e "$(date +%D" "%r):$INVERT Beginning Onetime backup of input $extradir$RESET$BLUE" ;
 				echo "--------------------------------------";	
 				fi
+set -x
 rsync_extra;
+set +x
 		fi
 
 ###########EXEC#####Full backup if root user#######
@@ -880,7 +995,9 @@ rsync_extra;
 				echo -e "$(date +%D" "%r):$INVERT Beginning Full backup of / $RESET$BLUE";
 				echo "--------------------------------------"; 
 			fi
+set -x
 rsync_fs;
+set +x
 		fi
 	fi
 ##
