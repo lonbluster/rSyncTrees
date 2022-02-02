@@ -11,7 +11,7 @@ U_LINED=$'\e[1;4m'
 RESET=$'\e[0m'
 INVERT=$'\e[7m'
 YELLOW=$'\e[93m'
-
+#test
 //#magenta
 [[ -f "$custom_config" ]] && source $custom_config
 
