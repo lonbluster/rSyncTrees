@@ -390,13 +390,14 @@ if tty -s; then
 	fi
 fi
 ###################Interactive#########
-
 #set -x
 ###Interactive#########################
 if tty -s; then clear;
 #Starting main header
 #Checking if disk space is enough
 #if $minGb is not set on the config file, if less than 9Gb will trigger the warning
+#type ync >/dev/null 2>&1 || { echo >&2 "rsync is installed in your linux?"; exit 1}
+
 	echo -e "$RED##############Backup destination: $GREEN $backup_root"
 	gbFree=$(df -h $sync_dir | awk '{print $4}')
 	if [[ ${gbFree//[^0-9]/} -lt ${minGbfree:-9} ]]; then echo "$hdYELLOW $U_LINED !! Disk space < ${minGbfree:-9}G !!$RESET"; fi
@@ -434,6 +435,11 @@ https://github.com/lonbluster/rSyncTrees.git
 Enjoy Trees!
 "
 )
+
+if ! [ -x "$(command -v rsync)" ]; then
+  echo -e "\n \n $U_LINED -- Error: rsync is not installed. Please install it first ;-) -- $RESET \n \n" >&2
+  exit 1
+fi
 
 #-####HELP
 ##
