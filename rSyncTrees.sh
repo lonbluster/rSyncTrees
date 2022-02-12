@@ -20,8 +20,10 @@ quick="\n Available options for >rSyncTrees: \n \
 	exlogs : expire logs in config dir \n \
 	speed : write test to Storage \n \
 	help : activates help if was off \n \
+	F : forces a Full backup for non-root users \n \
 	-* : (man rsync Options :-) runs faster than with no options \n \
 	[/valid/path]..." 
+	
 
 //#magenta
 [[ -f "$custom_config" ]] && source $custom_config
@@ -157,12 +159,13 @@ cleaner ()
 if tty -s; then 
 
 	if [ -n "$1" ]; then echo -e "\r $U_LINED..rSyncTrees cmd Options..$RESET "
-		
 		case $1 in
 		-*)
 		argu=$1
 		;;
-
+		F)
+		ForceFull=yes
+		;;
 		duA)
 			echo -e "$hdROSE Disk usage for Machine trees in $YELLOW $backup_root :"
 			ls -lh $backup_root
@@ -468,7 +471,6 @@ prompt_dir()
 	read -e extradir 
 	fi
 	}
-
 #creating function for checking the input dir
 list_bytes()
 	{
@@ -534,7 +536,7 @@ list_bytes()
 		fi
 }
 #end list_bytes function
-#set -x
+
 
 			
 if [[ $1 =~ ^[/]$ ]] || [[ $1 =~ ^[.]$ ]]; then
@@ -542,9 +544,12 @@ if [[ $1 =~ ^[/]$ ]] || [[ $1 =~ ^[.]$ ]]; then
 	fi
 #inform command line  argument needs be a full path
 ##############Interactive##############
+#set -x
 if tty -s; then
-		if [[ ! $UID -eq "0" ]]; then  #if root account
-			echo -e "!!AAA!! You are $INVERT NOT root $RESET,$RED Full backup will not run... !!AAA!! $RESET \n"; fi
+if [[ ! ${ForceFull} -eq "yes" ]]; then
+		if [[ ! $UID -eq "0" ]]; then  #if non root account or Full F
+			echo -e "!!AAA!! You are $INVERT NOT root $RESET,$RED Full backup will not run... !!AAA!! $RESET \n"; 
+		fi
 		prompt_dir
 #check if root and display prompt	
 #and help display, unless disabled on config file
@@ -700,6 +705,7 @@ if tty -s; then
 	fi
 #
 fi
+fi
 ##############Interactive##############
 
 stdINC="\n/home\n/etc\n/var\n/root\n/boot"
@@ -743,7 +749,7 @@ oneEXC_file=${rstHOME}/oneEXCbackup.txt
 #########Interactive#################
 if tty -s; then
 #
-	if [[ ! $onetimebk =~ ^[OoRr]$ ]] ; then  
+	if [[ ! $onetimebk =~ ^[OoRr]$ ]] || [[ $ForceFull = "yes" ]] ; then  
 #if Full backup
 #and user is root, show includes disk usage
 		if [[ $UID -eq "0" ]]; then  
@@ -767,10 +773,12 @@ if tty -s; then
 	fi 
 #eventually create the exclusion file for  Onetime and show excludes disk usage .
 #non root can run only Onetime backup of input, if storage is writable
-	if [[ ! $UID -eq "0" ]] && [[ -z "${extradir}" ]]; then #if is not root
+	if [[ ! $UID -eq "0" ]] && [[ -z "${extradir}" ]] && [[ ! $ForceFull = 'yes' ]]; then #if is not root
 			echo -e "$YELLOW No Full backup unless Root...\n Nothing to backup ? U&e!! Up and Enter !$RESET"; exit 1;
 	fi
-	if [[ ! $UID -eq "0" ]] && [[ ! -w $extras/* ]]; then
+#set -x
+#[[ ! $UID -eq "0" ]] && 
+	if [[ ! -w $extras ]] ; then
 	echo -e "\n\n\n $YELLOW! Warning ! ########## \n $RESET access denied to $RED${extras}$RESET and subfolders. \n Set directory permissions for current user, or backup WILL fail.\n"; sleep 5; 
 	fi
 	
@@ -888,6 +896,8 @@ rsync_extra()
 #######################################################
 #
 ###########EXEC#####Onetime/remote to folder Extra#######
+			
+
 if [[ -f $1 ]] || [[ -d $1 ]] || [[ "$1" == *@*:* ]]; then extradir=$1 && onetimebk='o'; fi
 		if [[ ! -z "${extradir// }" ]]; then #if extradir is NOT empty ?
 			echo "$(date +%D" "%r): Beginning backup of input dir $extradir" >> $log
@@ -902,7 +912,7 @@ set +x
 		fi
 
 ###########EXEC#####Full backup if root user#######
-	if [[ $UID -eq "0" ]]; then
+	if [[ $UID -eq "0" ]] || [[ $ForceFull = "yes" ]]; then
 		if [[ ! $onetimebk =~ ^[OoRr]$ ]]; then
 			echo "$(date +%D" "%r): Beginning backup of /" >> $log
 			if tty -s; then
