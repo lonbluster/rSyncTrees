@@ -23,7 +23,6 @@ quick="\n Available options for >rSyncTrees: \n \
 	-* : (man rsync Options :-) runs faster than with no options \n \
 	[/valid/path]..." 
 
-//#magenta
 [[ -f "$custom_config" ]] && source $custom_config
 
 if [[ -d "$STORAGE" ]] ;  
@@ -38,7 +37,7 @@ else
 			rsync_root=${HOME}/backup; 
 		fi
 fi
-//#
+
 
 
 if [[ -z "$rstHOME" ]] || [[ ! -d "$rstHOME" ]] || [[ ! -w "$rstHOME" ]]; then 
@@ -767,10 +766,10 @@ if tty -s; then
 	fi 
 #eventually create the exclusion file for  Onetime and show excludes disk usage .
 #non root can run only Onetime backup of input, if storage is writable
-	if [[ ! $UID -eq "0" ]] && [[ -z "${extradir}" ]]; then #if is not root
+	if [[ ! $UID -eq "0" ]] && [[ -z "${extradir}" ]]; then # if is not root and the path entered is not writable
 			echo -e "$YELLOW No Full backup unless Root...\n Nothing to backup ? U&e!! Up and Enter !$RESET"; exit 1;
 	fi
-	if [[ ! $UID -eq "0" ]] && [[ ! -w $extras/* ]]; then
+	if [[ ! $UID -eq "0" ]] && [[ ! -w $extras ]]; then
 	echo -e "\n\n\n $YELLOW! Warning ! ########## \n $RESET access denied to $RED${extras}$RESET and subfolders. \n Set directory permissions for current user, or backup WILL fail.\n"; sleep 5; 
 	fi
 	
