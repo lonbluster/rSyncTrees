@@ -437,7 +437,7 @@ Enjoy Trees!
 )
 
 if ! [ -x "$(command -v rsync)" ]; then
-  echo -e "\n \n $U_LINED -- Error: rsync is not installed. Please install it first ;-) -- $RESET \n \n" >&2
+  echo -e "\n \n $U_LINED -- Error: rsync is not installed. -- $RESET\n Maybe:  \n sudo apt install rsync \n ;-)  \n \n" >&2
   exit 1
 fi
 
