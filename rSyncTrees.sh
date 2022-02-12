@@ -11,6 +11,17 @@ U_LINED=$'\e[1;4m'
 RESET=$'\e[0m'
 INVERT=$'\e[7m'
 YELLOW=$'\e[93m'
+quick="\n Available options for >rSyncTrees: \n \
+	du/due/duA/dup : Disk Usage \n \
+	clean [path]: serial killer \n \
+	old [pattern]: manage and remove previous versions \n \
+	Rs : Restore files and directories \n \
+	rp/Rrp : Recovery point creation and restore \n \
+	exlogs : expire logs in config dir \n \
+	speed : write test to Storage \n \
+	help : activates help if was off \n \
+	-* : (man rsync Options :-) runs faster than with no options \n \
+	[/valid/path]..." 
 
 //#magenta
 [[ -f "$custom_config" ]] && source $custom_config
@@ -373,17 +384,7 @@ if tty -s; then
 		*) 	if [[ -d $1 ]] || [[ -f $1 ]] || [[ "$1" == *@*:* ]]; then 
 				cmd_path=$1; 
 			else
-				echo -e " \n Is this a valid path?:$YELLOW[$1]$RESET I don't know this option... yet! $hdROSE \n \
-	du/due/duA/dup : Disk Usage \n \
-	clean [path]: serial killer \n \
-	old [pattern]: manage and remove previous versions \n \
-	Rs : Restore files and directories \n \
-	rp/Rrp : Recovery point creation and restore \n \
-	exlogs : expire logs in config dir \n \
-	speed : write test to Storage \n \
-	help : activates help if was off \n \
-	-* : (man rsync Options :-) runs faster than with no options \n \
-	[/valid/path]...$RESET" && exit 1; 
+			echo -e  "\n Is this a valid path?:$YELLOW[$1]$RESET I don't know this option... yet! $hdROSE" $quick && exit 1;
 			fi	
 		esac 
 	fi
@@ -541,7 +542,7 @@ if tty -s; then
 		prompt_dir
 #check if root and display prompt	
 #and help display, unless disabled on config file
-		if [[ ! $HELP == "off" ]]; then echo -e "$RED"; echo "$HELPless" | less ; fi
+		if [[ ! $HELP == "off" ]]; then echo -e "$RED"; echo -e "$HELPless" "$quick" | less ; fi
 	
 ########
 ############
