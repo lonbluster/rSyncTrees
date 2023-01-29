@@ -1,6 +1,6 @@
 #!/bin/bash
 #set -x
-custom_config=/etc/.rsynctrees
+custom_config=/etc/rsynctrees
 ##Always better to have the config file in place with the variables shown on the help.
 ##All colors with names
 RED=$'\e[31m'
