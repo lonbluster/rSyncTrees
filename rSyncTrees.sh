@@ -442,6 +442,7 @@ fi
 
 #-####HELP
 ##
+#set -x
 prompt_dir()
 	{
 	if [[ "$Rs" != 1 ]]; then
@@ -467,11 +468,15 @@ prompt_dir()
 	read -e extradir 
 	fi
 	}
+#echo $extradir
+#echo $extradir
 
+#exit
 #creating function for checking the input dir
 list_bytes()
 	{
-	extradir=$(echo $extradir | sed 's:/*$::')  
+		IFS=''
+	extradir=$(echo $extradir | echo "${extradir%/}")  
 ##Rules out the input of / alone, and cleans trailing
 #unless provided on command line, a restore path needs be seized
 	while [[ -z "$extradir" ]] ; do 
