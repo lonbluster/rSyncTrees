@@ -30,7 +30,7 @@ if [[ -d "$STORAGE" ]] ;
 #if STORAGE is set, variable is set withouth trailing /
 #sed could be replaced by "echo ${STORAGE%/}"
 #2 alternative storages, and 1 extra var, and HOME
-else  
+	else  
 		if [[ -d "$otherStorage" ]]; then
 			rsync_root=$otherStorage; 
 		else		
@@ -45,7 +45,7 @@ if [[ -z "$rstHOME" ]] || [[ ! -d "$rstHOME" ]] || [[ ! -w "$rstHOME" ]]; then
 	if [[ ! -d "$rstHOME" ]]; then mkdir $rstHOME ; fi
 fi
 # Check write acces on Config dir/Create the config dir specified on the config file, or as subfolder in Home , 
-#Default transfer size for speed measurement from .rsynctrees
+# Default transfer size for speed measurement from $custom_config (/etc/rsynctrees)
 if [[ -z "$ttestMb" ]]; then 
 ttestMb=555; 
 fi
@@ -67,7 +67,7 @@ if tty -s ; then clear && cd $HOME;
 #if the backup folder has been deleted or STORAGE is not set
 #list available file systems on their mountpoints, with % available and GB remaining
 		df -H --output=target,pcent,avail,source
-		echo -e "\n - Input your capient $RED$U_LINED STORAGE FOLDER $RESET full path, \n - or type $U_LINED backup $RESET for /home/you/backup... \n - or run as root to enable otherStorage in /etc/.rsynctrees. \n"
+		echo -e "\n - Input your capient $RED$U_LINED STORAGE FOLDER $RESET full path, \n - or type $U_LINED backup $RESET for /home/you/backup... \n - or run as root to enable otherStorage in $custom_config. \n"
 		read -e -r store 
 	#read variable
 			if [[ -n "$store" ]]; then  
@@ -81,7 +81,7 @@ if tty -s ; then clear && cd $HOME;
 				rsync_root=$(echo $store | sed 's:/*$::'); backup_root=${rsync_root}/$(hostname) && mkdir -v $backup_root; sleep 2
 				echo STORAGE=${store} >> ${custom_config};
 				fi
-			else echo -e "Input something or set /etc/.rsynctrees. $YELLOW U&e!$RESET" && exit
+			else echo -e "Input something or set $GREEN $custom_config. $YELLOW U&e!$RESET" && exit
 			fi
 	elif [[ ! -d "$backup_root" ]]; then mkdir -v $backup_root; 
 	fi
@@ -105,20 +105,27 @@ cleaner ()
 ##banner colored
 ## function to input  new dir, or setting default
 			prompt ()	
-				{   
+				{
 					echo -e "\r"
-					read -r -p "Enter or Input to change current $RED $cleandir #>" -e newdir
-					if [[ $newdir == 'q' ]]; then exit; fi
-						if [[ -d "$newdir" ]]  ; then 
-							cleandir=$newdir; 
-							else
-							if [[ -z $cleandir ]]; then
-							echo "Invalid dir, selecting your home.."; cleandir=$HOME; 
-							fi
+					echo "newdir:$newdir"
+					echo "cleandir:$cleandir"
+
+					if [[ -z "$cleandir" ]] || [[ ! -d "$cleandir" ]]; then
+						if [[ -f "$newdir" ]]; then echo "Selecting container directory of input file.." ; cleandir=$(dirname $newdir); 
+						elif [[ -d "$newdir" ]]  ; then cleandir=$newdir; 
+						else read -r -p "(quit with q) Enter or Input to change current $RED $cleandir #>" -e newdir; fi
+						if [[ -z $newdir ]]; then echo "Invalid dir, selecting your storage.."; cleandir=$backup_root; fi
 						fi
+							#	elif [[ ! -d "$newdir" ]] || [[ ! -f "$newdir" ]]; then echo -e "Invalid Path:$GREEN$newdir$RESET"; 
+								
+					#elif [[ -f "$newdir" ]]  ; then echo "Selecting container directory" ; cleandir=$(dirname $newdir); fi
+				echo "max 10 seconds for space calculation.."&& timeout 10 du -sh $cleandir && du -sh $cleandir/*|| ls -lha $cleandir;
 				}
-			
-			if [[ -d "$1" ]] || [[ -f "$1" ]]; then cleandir=$1; else prompt; fi
+					#echo "Selezione da linea $2"
+					#if [[ $newdir == 'q' ]]; then exit; fi
+				#}
+							
+			if [[ -d "$1" ]]  || [[ -f "$1" ]]; then cleandir=$1; else newdir=$1; fi
 
 			while [[ $newdir != 'q' ]]; do
 			prompt
@@ -126,25 +133,35 @@ cleaner ()
 # remove trailing  and show size
 			cleandir=$(echo $cleandir | sed 's:/*$::'); 				
 				echo -e "\r $RESET"
-				du -sh ${cleandir}/*  | sort -hk1
+				#list () {
+				#find ${cleandir} -maxdepth 1 -type d,f
+					#echo $cleandir
+				#	}
+				#echo "wait...max 10 seconds" && list
 				echo -e "\r $RED"
 				sleep 2
 				COLUMNS=1
-				PS3=$(echo -e "\r$RESET"; du -sh $cleandir; echo -e "\n Select and destroy :enter Number\n ..or paste new Path to select.. $BLUE#")
-					select item in $(du -s ${cleandir}/* | sort -hk1 | awk '{print $2}') $cleandir;
+				PS3=$(echo -e "\r$RESET"; REPLY=''; echo -e "\n Select and destroy :enter Number\n ..or paste new Path to select.. $BLUE#")
+				IFS=$'\n';
+					select item in $( find ${cleandir} -maxdepth 1 -type d,f ) 
+					# max 9 spaces in file name!!
+					#select item in $(du -sh $cleandir/*| awk -F '\n';{print $2}')
+					#select item in $(find ${cleandir} -maxdepth 1 -type d,f );  #| sort -hk1| awk '{print $2}'
 					do 	
-					if [ -f $REPLY ] || [ -d $REPLY ]; then cleandir=$REPLY; break; fi
+					#item=$(echo $item | sed -e 's/[[:space:]]*$//g')
+						if [ -f $REPLY ] || [ -d $REPLY ]; then newdir=$REPLY; cleandir=$REPLY; break; fi
 						echo -e "\r"
-						ls -l $item
+						echo -e "Content of selection $REPLY:-$item :"
+						ls -la $item #show hidden items in directory
 						echo -e "$hdROSE"
-						du -sh $item
-						echo "Wiping the above in 1s..."
+						#du -sh $item
+						echo "Wiping the above? Enter to CLEAN"
+						read
 						sleep 1
 						echo -e "$RESET"
-						if [[ -d $item ]] || [[ -f $item ]] ; then
-						rm -rfI $item
-						echo "Something was performed..."; 
-						else echo "Ïnvalid input"; fi
+						if [[ -d $item ]] || [[ -f $item ]] ; then # cleandir= $(dirname $item); echo "cleandir: $cleandir"
+						rm -rf $item && echo "Something was performed..."; 
+						else echo "Invalid input"; fi
 						sleep 1
 						echo -e "\r $BLUE"
 					break
@@ -168,7 +185,7 @@ if tty -s; then
 			echo -e "\r $BLUE"
 			echo "Calculating sizes...4s"
 			for dir in $(ls -d ${backup_root}/*/ | sed 's:/*$::'); do 
-			timeout 4 du -sh ${dir}/* || echo "THICK:"$dir ;
+				timeout 4 du -sh ${dir}/* || echo "THICK:"$dir ;
 			done | sort -hk1; 
 			echo -e "\r $RESET"
 			exit
@@ -230,7 +247,7 @@ if tty -s; then
 			#set -x
 			week1="_0[1-9]"
 			#if [ -d $2 ] && [[ $2 != "." ]]; then previous=$2; fi
-			echo -e "$YELLOW Finding previous versions...\n$RESET !avoid multiple filters for faster results"
+			echo -e "$YELLOW Find previous versions. Enter for default filters ! \n$RESET !avoid multiple filters for faster results"
 			echo -e "\r $YELLOW"
 			
 				if [[ -n $2 ]]; then 
@@ -243,6 +260,7 @@ if tty -s; then
 				fi
 			echo -e "any specific day of month...? $RESET"; 
 			read -t 5 day
+			echo -e "$YELLOW Finding previous versions...\n"
 	
 			oldmatch=*_[0-3][0-9]*_h*
 			#too vague, should be more specific  
@@ -311,6 +329,7 @@ if tty -s; then
 					;;
 	
 		clean) 
+		IFS="";
 			if [[ -n $2 ]]; then cleanPath=$2;fi
 			cleaner $cleanPath
 			;;
@@ -848,7 +867,7 @@ if tty -s; then
 			fi 
 		done | sort -hk1
 		echo -e '\r' #carriage return
-		echo -e "$RESET- For full backup exclusions:";
+		echo -e "For full backup exclusions:";
 		echo -e "$stdEXC"; 
 	fi
 #finally provide examples of optional command line switches
