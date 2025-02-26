@@ -1,5 +1,5 @@
 #!/bin/bash
-#feb25
+#feb2025
 #set -x
 custom_config=/etc/rsynctrees
 ##Always better to have the config file in place with the variables shown on the help.
@@ -24,6 +24,7 @@ quick="\n Available options for >rSyncTrees: \n \
 	-* : (man rsync Options :-) runs faster than with no options \n \
 	[/valid/path]..." 
 
+maxFsize=99mb #default maximun file size to sync - set otherwise in $custom_config
 [[ -f "$custom_config" ]] && source $custom_config
 
 if [[ -d "$STORAGE" ]] ;  
@@ -108,8 +109,8 @@ cleaner ()
 			prompt ()	
 				{
 					echo -e "\r"
-					echo "newdir:$newdir"
-					echo "cleandir:$cleandir"
+					#echo "newdir:$newdir"
+					#echo "cleandir:$cleandir"
 
 					if [[ -z "$cleandir" ]] || [[ ! -d "$cleandir" ]]; then
 						if [[ -f "$newdir" ]]; then echo "Selecting container directory of input file.." ; cleandir=$(dirname $newdir); 
@@ -445,7 +446,7 @@ Q to quit this Help and continue to backup.
 Find full doc on the README.md or at
 https://github.com/lonbluster/rSyncTrees.git
 
-@@@@@@@@@@This message will be disable when HELP=off in /etc/.rsynctrees.
+@@@@@@@@@@This message will be disable when HELP=off in $custom_config.
 
 #Requirements for rSyncTrees
 #'Rsync' should be installed! And 'Bash' too! 
@@ -488,7 +489,6 @@ prompt_dir()
 	read -e extradir 
 	fi
 	}
-#echo $extradir
 #echo $extradir
 
 #exit
@@ -771,7 +771,7 @@ if tty -s; then
 #if Full backup
 #and user is root, show includes disk usage
 		if [[ $UID -eq "0" ]]; then  
-			echo -e "$GREEN+ Will be synced in Full monthly backup:";
+			echo -e "$GREEN+ Will be synced in Full monthly backup: ";
 			for incl in $(cat $include_file); do
 				if [ ! -d $incl ] && [ ! -f $incl ]; then 
 					echo "NOT THERE" $incl; else timeout 2 du -sh $incl || echo "THICK:"$incl ; 
@@ -798,7 +798,7 @@ if tty -s; then
 	echo -e "\n\n\n $YELLOW! Warning ! ########## \n $RESET access denied to $RED${extras}$RESET and subfolders. \n Set directory permissions for current user, or backup WILL fail.\n"; sleep 5; 
 	fi
 	
-	echo -e "\n $GREEN   ###-1- We will backup the above.......\n $RESET \n- Some $U_LINED PATH TO EXCLUDE $RESET from this backup ?? : \n @-HELP: same or more specific than the above paths-@ \n \n ..Continues in 21s..            ..exclude $YELLOW#";	#read#EXCLU
+	echo -e "\n $GREEN   ###-1- We will backup the above......(maximun file size: $maxFsize)\n  $RESET \n- Some $U_LINED PATH TO EXCLUDE $RESET from this backup ?? : \n @-HELP: same or more specific than the above paths-@ \n \n ..Continues in 21s..            ..exclude $YELLOW#";	#read#EXCLU
 	read -t 21 -e exclu
 	
 	if [[ -n "${exclu}" ]]; then
@@ -895,7 +895,7 @@ df -H  --output=source,pcent,avail $rsync_root >> $log
 ###
 ##
 rsync_fs()
-	{ rsync -azhRb --files-from=$include_file --recursive --backup-dir=$previous --suffix=$bkdate --max-size=321mb --safe-links --info=BACKUP2,DEL2,COPY2,PROGRESS2 --exclude-from=$exclude_file --exclude $backup_root --exclude "$exclu" --exclude "$exclu2" $(stdexc) --delete-excluded $argu --log-file=$log --log-file-format="%''B %''i %''l %''b %''o %''n %L" --modify-window=1 / $sync_dir
+	{ rsync -azhRb --files-from=$include_file --recursive --backup-dir=$previous --suffix=$bkdate --max-size=$maxFsize --safe-links --info=BACKUP2,DEL2,COPY2,PROGRESS2 --exclude-from=$exclude_file --exclude $backup_root --exclude "$exclu" --exclude "$exclu2" $(stdexc) --delete-excluded $argu --log-file=$log --log-file-format="%''B %''i %''l %''b %''o %''n %L" --modify-window=1 / $sync_dir
 	}
 #man rsync
 #-b, --backup                make backups (see --suffix & --backup-dir)
