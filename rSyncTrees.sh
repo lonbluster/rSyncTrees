@@ -1,4 +1,5 @@
 #!/bin/bash
+#feb25
 #set -x
 custom_config=/etc/rsynctrees
 ##Always better to have the config file in place with the variables shown on the help.
